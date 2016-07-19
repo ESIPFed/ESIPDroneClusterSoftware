@@ -1,0 +1,12 @@
+*.iml
+*.pyc
+*.tar
+*.DS_Store
+.*DS_Store?
+*.swp
+*.ods
+
+**/.idea/*
+**/.idea/workspace.xml 
+**/.idea/tasks.xml
+**/temp/*

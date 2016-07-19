@@ -1,0 +1,13 @@
+#Plot cleaned logs to see where the start alt should be
+$ python VProfile_plots.py plotcleaned morning1.csv afternoon1.csv 
+
+#Plot 1 aligned log to check the start altitude is correct
+$ python VProfile_plots.py plotaligned 71 afternoon1.csv 
+
+#Plot both aligned files in 1
+python VProfile_plots.py plotmulti 71 morning1.csv afternoon1.csv 
+
+#Clean up afterwards
+python VProfile_plots.py clean
+
+
