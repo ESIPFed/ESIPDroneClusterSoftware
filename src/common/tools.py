@@ -1,7 +1,44 @@
-""" Common tools for manipulating data files coming of the drone """
+""" Shared tools for manipulating data files coming off the drone """
 import subprocess
 import csv
 
+
+
+def align_logs(afile, st_alt):
+    """ Remove rows from prior to start_alt
+    :param afile: CO2meter csv log file
+    :return: 0 on success, 1 on failure
+    """
+    seek_start = 0
+    cfile=str(afile.split("/")[-1:][0])
+
+    with open("./temp/cleaned_" + cfile, newline='') as csvfile:
+        csv_reader = csv.reader(csvfile, delimiter=',')
+        next(csv_reader)
+
+        with open("./temp/aligned_" + cfile, 'w', newline='') as aligned:
+            csv_writer = csv.writer(aligned)
+            csv_writer.writerow(["CO2", "Altitude"])
+
+            # TODO replace this crude approximation with a differential based 'trigger'
+            for row in csv_reader:
+                if seek_start == 0:
+                    if float(row[1]) >= float(st_alt):
+                        seek_start = 1
+                else:
+                    try:
+                        csv_writer.writerow([row[0], row[1]])
+                    except:
+                        print("Failed to write row to \"{}\"".format(csv_writer))
+                        return 1
+
+
+def clean_up():
+    """
+    Cleans up after script removing temporary files
+    """
+    print("Cleaning up")
+    subprocess.call("rm -r ./temp/", shell=True)
 
 def check_make(path,type):
     """ Preforms the tedious process of checking is a file/directory exists and creating it if not.

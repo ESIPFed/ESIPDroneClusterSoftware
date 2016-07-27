@@ -1,174 +1,11 @@
 """
-Reads in 1 or more CO2Meter profile logs and creates plots accordingly.  All comands except clean "-c" can be run
+Reads in 1 or more CO2Meter profile logs and creates plots accordingly.  All commands except clean "-c" can be run
 with multiple files
 """
 import argparse
-import matplotlib.pyplot as plt
-import pandas as pd
 import sys
 
-import common_tools
-
-def align_logs(afile, st_alt):
-    """ Remove rows from prior to start_alt
-    :param afile: CO2meter csv log file
-    :return: 0 on success, 1 on failure
-    """
-    seek_start = 0
-    cfile=str(afile.split("/")[-1:][0])
-
-    with open("./temp/cleaned_" + cfile, newline='') as csvfile:
-        csv_reader = csv.reader(csvfile, delimiter=',')
-        next(csv_reader)
-
-        with open("./temp/aligned_" + cfile, 'w', newline='') as aligned:
-            csv_writer = csv.writer(aligned)
-            csv_writer.writerow(["CO2", "Altitude"])
-
-            # TODO replace this crude approximation with a differential based 'trigger'
-            for row in csv_reader:
-                if seek_start == 0:
-                    if float(row[1]) >= float(st_alt):
-                        seek_start = 1
-                else:
-                    try:
-                        csv_writer.writerow([row[0], row[1]])
-                    except:
-                        print("Failed to write row to \"{}\"".format(csv_writer))
-                        return 1
-
-    pass
-
-
-def create_multiplot(files):
-    """
-    :param files: Creates plot from list of files
-    :return: 0 on success, 1 on failure
-    """
-    # Setup
-    fig, ax1 = plt.subplots()
-    ax1.set_xlabel('Time step')
-    ax1.set_ylabel('CO2 (PPM)', color='black')
-    for tl in ax1.get_yticklabels():
-        tl.set_color('black')
-    ax1.spines["top"].set_visible(False)
-    ax1.spines["bottom"].set_visible(False)
-    ax1.spines["right"].set_visible(False)
-    ax1.spines["left"].set_visible(False)
-    ax1.get_xaxis().tick_bottom()
-    ax1.get_yaxis().tick_left()
-
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Altitude (m above sea level)', color='black')
-    for tl in ax2.get_yticklabels():
-        tl.set_color('black')
-    ax2.spines["top"].set_visible(False)
-    ax2.spines["bottom"].set_visible(False)
-    ax2.spines["right"].set_visible(False)
-    ax2.spines["left"].set_visible(False)
-    ax2.get_xaxis().tick_bottom()
-
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-
-    # Read in CO2 and Alt
-    CO2s = []
-    Alts = []
-    lengths = []
-    lables = []
-
-    for afile in files:
-        df = pd.read_csv(str(afile))
-        CO2s.append(df['CO2'])
-        Alts.append(df['Altitude'])
-        lables.append(afile)
-
-        lengths.append(len(df['Altitude']))
-
-    x = range(max(lengths))
-
-    i = 0
-    for (co, l) in zip(CO2s, lables):
-        x = range(len(co))
-        ax1.plot(x, co, color=tableau20[i], label=l)
-        # ax1.plot(x, co, color=tableau20[i],label=l)
-        # ax1.plot(x, co, color=tableau20[i])
-        i += 1
-
-    i = 0
-    for (alt, l) in zip(Alts, lables):
-        x = range(len(alt))
-        ax2.plot(x, alt, color=tableau20[i], label=l, linestyle="--")
-        # ax2.plot(x, alt, color=tableau20[i],label=l)
-        i += 1
-
-    # plt.title("Vertical profile plot",color=tableau20[0])
-    #TODO Check for overwriting
-    plt.savefig("./images/multiplot.png", bbox_inches="tight")
-
-    # TODO add flag to turn this on and off
-    #plt.show()
-
-
-def make_plot(afile,count):
-    """Creates a profile plot from a single cleaned profile log
-    :param afile    A source file containing aligned CO2 and Alt readings
-    :param count   The image number of this run
-    """
-
-    # Pretty setup
-    # These are the "Tableau 20" colors as RGB.
-    c1 = tableau20[4]
-    c2 = tableau20[18]
-
-    # Read in CO2 and Alt
-    df = pd.read_csv(afile)
-    # print(list(df.columns.values))
-    co = df['CO2']
-    alt = df['Altitude']
-    x = range(len(alt))
-
-    fig, ax1 = plt.subplots()
-    ax1.plot(x, co, color=c1)
-    ax1.set_xlabel('Time step')
-    ax1.set_ylabel('CO2 (PPM)', color=c1)
-    for tl in ax1.get_yticklabels():
-        tl.set_color(c1)
-    ax1.spines["top"].set_visible(False)
-    ax1.spines["bottom"].set_visible(False)
-    ax1.spines["right"].set_visible(False)
-    ax1.spines["left"].set_visible(False)
-    ax1.get_xaxis().tick_bottom()
-    ax1.get_yaxis().tick_left()
-
-    ax2 = ax1.twinx()
-    ax2.plot(x, alt, color=c2)
-    ax2.set_ylabel('Altitude (m above sea level)', color=c2)
-    for tl in ax2.get_yticklabels():
-        tl.set_color(c2)
-    ax2.spines["top"].set_visible(False)
-    ax2.spines["bottom"].set_visible(False)
-    ax2.spines["right"].set_visible(False)
-    ax2.spines["left"].set_visible(False)
-    ax2.get_xaxis().tick_bottom()
-
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-    # plt.title("Vertical profile plot",color=tableau20[0])
-    #TODO Check for overwriting
-    plt.savefig("./images/{}_{}.png".format(count,"_".join(afile.split("_")[1:])), bbox_inches="tight")
-
-    # TODO add flag to turn this on and off
-    #plt.show()
-
-
-def clean_up():
-    """
-    Cleans up after script removing temporary files
-    """
-    print("Cleaning up")
-    subprocess.call("rm -r ./temp/", shell=True)
-
+from common import tools plots
 
 def main():
     """ Run commands in correct sequence to create plot
@@ -218,38 +55,38 @@ def main():
 
     # Command Selection
     if args.command == "plotcleaned":
-        check_make("./temp","directory")
-        check_make("./images","directory")
+        tools.check_make("./temp","directory")
+        tools.check_make("./images","directory")
         i = range(len(args.files))
 
         for f,i in zip(args.files,i):
-            clean_log(f)
+            tools.clean_log(f)
             ffile="./temp/cleaned_{}".format(str(f.split("/")[-1:][0]))
-            make_plot(ffile,i)
+            plots.make_plot(ffile,i)
             # make_plot("./temp/cleaned_{}".format(cf[0]),i)
         return 0
 
     elif args.command == "plotaligned":
-        check_make("./temp","directory")
-        check_make("./images","directory")
+        tools.check_make("./temp","directory")
+        tools.check_make("./images","directory")
         i = range(len(args.files))
 
         for f,i in zip(args.files,i):
-            clean_log(f)
-            align_logs(f, args.st_alt)
+            tools.clean_log(f)
+            tools.align_logs(f, args.st_alt)
             ffile="./temp/aligned_{}".format(str(f.split("/")[-1:][0]))
             make_plot(ffile,i)
         return 0
 
     elif args.command == "plotmulti":
-        check_make("./temp","directory")
-        check_make("./images","directory")
+        tools.check_make("./temp","directory")
+        tools.check_make("./images","directory")
 
         aligned = []
         for f in args.files:
             # for f in args.files:
-            clean_log(f)
-            align_logs(f, args.st_alt)
+           tools. clean_log(f)
+           tools. align_logs(f, args.st_alt)
             # aligned.append("./temp/aligned_{}".format(cf))
             aligned.append("./temp/aligned_{}".format(str(f.split("/")[-1:][0])))
 
@@ -263,8 +100,6 @@ def main():
     else:
         print("Unknown command")
         return 1
-
-
 
 # Run main
 main()
