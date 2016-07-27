@@ -2,92 +2,12 @@
 Reads in 1 or more CO2Meter profile logs and creates plots accordingly.  All comands except clean "-c" can be run
 with multiple files
 """
-import csv
-import subprocess
 import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
 import sys
 
-# Create pretty colours for plots
-tableau20 = [(31, 119, 180), (123, 102, 210), (44, 160, 44), (255, 152, 150), (214, 39, 40), (23, 190, 207), (188, 189, 34), (127, 127, 127),
-             (220,95,189),(140, 86, 75), (174, 199, 232), (255, 127, 14),
-             (255, 187, 120),(152, 223, 138), (197, 176, 213),(196, 156, 148),
-             (247, 182, 210), (199, 199, 199), (219, 219, 141), (158, 218, 229)]
-
-# Scale the RGB values to the [0, 1] range, which is the format matplotlib accepts.
-for i in range(len(tableau20)):
-    r, g, b = tableau20[i]
-    tableau20[i] = (r / 255., g / 255., b / 255.)
-
-def check_make(path,type):
-    """ Preforms the tedious process of checking is a file/directory exists and creating it if not.
-    :param path: path
-    :param type: file or directory
-    :return: 0 on success, 1 on failure
-    """
-
-
-    if type.lower() == "file":
-        try:
-            retcode = subprocess.call("touch {}".format(path), shell=True)
-            if retcode < 0:
-                print("Child was terminated by signal", -retcode, file=sys.stderr)
-            else: return 0
-
-        except OSError as e: print("Execution failed:", e, file=sys.stderr)
-
-    elif type.lower() == "directory":
-
-        try:
-            retcode = subprocess.call("mkdir {}".format(path), shell=True)
-            if retcode < 0:
-                print("Child was terminated by signal", -retcode, file=sys.stderr)
-            else: return 0
-
-        except OSError as e:
-            print("Execution failed:", e, file=sys.stderr)
-
-    else:
-        return 1
-
-
-
-
-def clean_log(afile):
-    """ Remove all data lines where drone was not in AUTO mode
-    :param afile: CO2meter csv log file
-    :return: 0 on success, 1 on failure
-    """
-
-    with open(afile, newline='') as csvfile:
-        csv_reader = csv.reader(csvfile, delimiter=',')
-        cfile=str(afile.split("/")[-1:][0])
-
-        with open(str("./temp/cleaned_" + cfile), 'w', newline='') as cleaned:
-            csv_writer = csv.writer(cleaned)
-            csv_writer.writerow(["CO2", "Altitude"])
-
-            for row in csv_reader:
-                # Remove all rows not from during the mission ("AUTO") and containing outlier CO2 readings above 1000PPM
-                if "AUTO" in row and (float(row[0]) <= 1000):
-                    try:
-                        csv_writer.writerow([row[0], row[3]])
-                    except:
-                        print("Failed to write row to \"{}\"".format(csv_writer))
-                        return 1
-
-    return 0
-
-
-def diff(alt):
-    """
-    :param alt: list/pd/other of alt data for a log
-    :return: list/pd/other of instantaneous rate change
-    """
-    # TODO differentiate altitude (convert alt array into an array of instantaneous rate of change as a better start 'trigger'
-    pass
-
+import common_tools
 
 def align_logs(afile, st_alt):
     """ Remove rows from prior to start_alt
