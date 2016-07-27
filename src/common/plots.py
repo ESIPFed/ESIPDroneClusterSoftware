@@ -16,10 +16,11 @@ for i in range(len(tableau20)):
     tableau20[i] = (r / 255., g / 255., b / 255.)
 
 
-def make_plot(afile, count):
+def simple_plot(afile, count, show=False):
     """Creates a Vprofile plot from a single cleaned Vprofile log
     :param afile    A source file containing aligned CO2 and Alt readings
     :param count   The image number of this run
+    :param show: Default false, if true will show plots as generated
     """
 
     # Pretty setup
@@ -63,12 +64,14 @@ def make_plot(afile, count):
     # TODO Check for overwriting
     plt.savefig("./images/{}_{}.png".format(count, "_".join(afile.split("_")[1:])), bbox_inches="tight")
 
-    # TODO add flag to turn this on and off
-    # plt.show()
+    if show:
+        plt.show()
 
-def create_multiplot(files):
+
+def multi_plot(files, show=False):
     """
     :param files: Creates plot from list of files
+    :param show: Default false, if true will show plots as generated
     :return: 0 on success, 1 on failure
     """
     # Setup
@@ -126,8 +129,8 @@ def create_multiplot(files):
         i += 1
 
     # plt.title("Vertical profile plot",color=black)
-    #TODO Check for overwriting
+    # TODO Check for overwriting
     plt.savefig("./images/multiplot.png", bbox_inches="tight")
 
-    # TODO add flag to turn this on and off
-    #plt.show()
+    if show:
+        plt.show()

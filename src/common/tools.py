@@ -3,6 +3,11 @@ import subprocess
 import csv
 
 
+def dodo():
+    print("woofwoof")
+    if S:
+        print ("meewoo")
+
 
 def align_logs(afile, st_alt):
     """ Remove rows from prior to start_alt
@@ -71,30 +76,30 @@ def check_make(path,type):
     else:
         return 1
 
-    def bclean_log(afile):
-        """ Basic cleaning of data file: Remove all data lines where drone was not in AUTO mode
-        :param afile: CO2meter csv log file
-        :return: 0 on success, 1 on failure
-        """
+def bclean_log(afile):
+    """ Basic cleaning of data file: Remove all data lines where drone was not in AUTO mode
+    :param afile: CO2meter csv log file
+    :return: 0 on success, 1 on failure
+    """
 
-        with open(afile, newline='') as csvfile:
-            csv_reader = csv.reader(csvfile, delimiter=',')
-            cfile = str(afile.split("/")[-1:][0])
+    with open(afile, newline='') as csvfile:
+        csv_reader = csv.reader(csvfile, delimiter=',')
+        cfile = str(afile.split("/")[-1:][0])
 
-            with open(str("./temp/cleaned_" + cfile), 'w', newline='') as cleaned:
-                csv_writer = csv.writer(cleaned)
-                csv_writer.writerow(["CO2", "Altitude"])
+        with open(str("./temp/cleaned_" + cfile), 'w', newline='') as cleaned:
+            csv_writer = csv.writer(cleaned)
+            csv_writer.writerow(["CO2", "Altitude"])
 
-                for row in csv_reader:
-                    # Remove all rows not from during the mission ("AUTO") and containing outlier CO2 readings above 1000PPM
-                    if "AUTO" in row and (float(row[0]) <= 1000):
-                        try:
-                            csv_writer.writerow([row[0], row[3]])
-                        except:
-                            print("Failed to write row to \"{}\"".format(csv_writer))
-                            return 1
+            for row in csv_reader:
+                # Remove all rows not from during the mission ("AUTO") and containing outlier CO2 readings above 1000PPM
+                if "AUTO" in row and (float(row[0]) <= 1000):
+                    try:
+                        csv_writer.writerow([row[0], row[3]])
+                    except:
+                        print("Failed to write row to \"{}\"".format(csv_writer))
+                        return 1
 
-        return 0
+    return 0
 
     def diff(alt):
         """

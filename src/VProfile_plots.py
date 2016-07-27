@@ -5,17 +5,19 @@ with multiple files
 import argparse
 import sys
 
-from common import tools plots
+from common import tools, plots
 
 def main():
     """ Run commands in correct sequence to create plot
     :return: 0 o success, 1 on failure
     """
 
-    print(sys.version)
+    # print(sys.version)
 
     # args parsing
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-s', action='store_true', default=False,help="Show plots as generated (requires a displayed plot be closed "
+                                                        "before any further plots will be generated")
     subparsers = parser.add_subparsers(dest="command", help="A command is required")
     subparsers.required = True
 
@@ -51,6 +53,7 @@ def main():
 
     args = parser.parse_args()
 
+    print(args)
 
 
     # Command Selection
@@ -60,9 +63,9 @@ def main():
         i = range(len(args.files))
 
         for f,i in zip(args.files,i):
-            tools.clean_log(f)
+            tools.bclean_log(f)
             ffile="./temp/cleaned_{}".format(str(f.split("/")[-1:][0]))
-            plots.make_plot(ffile,i)
+            plots.simple_plot(ffile,i,args.s)
             # make_plot("./temp/cleaned_{}".format(cf[0]),i)
         return 0
 
@@ -72,10 +75,10 @@ def main():
         i = range(len(args.files))
 
         for f,i in zip(args.files,i):
-            tools.clean_log(f)
+            tools.bclean_log(f)
             tools.align_logs(f, args.st_alt)
             ffile="./temp/aligned_{}".format(str(f.split("/")[-1:][0]))
-            make_plot(ffile,i)
+            plots.simple_plot(ffile,i,args.s)
         return 0
 
     elif args.command == "plotmulti":
@@ -85,12 +88,12 @@ def main():
         aligned = []
         for f in args.files:
             # for f in args.files:
-           tools. clean_log(f)
-           tools. align_logs(f, args.st_alt)
+            tools.bclean_log(f)
+            tools.align_logs(f, args.st_alt)
             # aligned.append("./temp/aligned_{}".format(cf))
             aligned.append("./temp/aligned_{}".format(str(f.split("/")[-1:][0])))
 
-        create_multiplot(aligned)
+        plots.multi_plot(aligned,args.s)
         return 0
 
     elif args.command == "clean":
