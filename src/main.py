@@ -56,6 +56,17 @@ def main():
                                 "supplied files ")
     pm_parser.add_argument("files", nargs='+', help="(Required) Supply paths to CO2meter csv log files")
 
+
+    #Plot Box plot
+    pb_parser = subparsers.add_parser("Bplotmulti",
+                                      help="Clean, align to st_alt, and create box plots for all supplied log files on "
+                                           "the same graph: logs will be cleaned and begin only after the trigger start"
+                                           "_alt is reached")
+    pb_parser.add_argument('st_alt', type=float, default=0.0,
+                           help=" Supply the GPS read altitude from which to trigger plotting in all "
+                                "supplied files ")
+    pb_parser.add_argument("files", nargs='+', help="(Required) Supply paths to CO2meter csv log files")
+
     # Plot by altitude command
     pac_parser = subparsers.add_parser("plotCVsA",
                                       help="Clean, align to st_alt, and plot all supplied log files on the same graph as CO2 vs Altitude "
@@ -68,9 +79,9 @@ def main():
     pac_parser.add_argument("files", nargs='+', help="(Required) Supply paths to CO2meter csv log files")
 
     # Clean directory command
-    # c_parser = subparsers.add_parser("clean",
-    #                                  help="Clean local directory, WARNING: this will remove all generated csv in the "
-    #                                       "./temp directory")
+    c_parser = subparsers.add_parser("clean",
+                                     help="Clean local directory, WARNING: this will remove all generated csv in the "
+                                          "./temp directory")
 
     args = parser.parse_args()
 
@@ -136,6 +147,19 @@ def main():
             aligned.append("./temp/aligned_{}".format(str(f.split("/")[-1:][0])))
 
         plots.co2_height(aligned, args.s)
+        return 0
+
+    elif args.command == "Bplotmulti":
+        tools.check_make("./temp", "directory")
+        tools.check_make("./images", "directory")
+
+        aligned = []
+        for f in args.files:
+            tools.bclean_log(f)
+            tools.align_logs(f, args.st_alt)
+            aligned.append("./temp/aligned_{}".format(str(f.split("/")[-1:][0])))
+
+        plots.Bplot_multi(aligned, args.s)
         return 0
 
     elif args.command == "clean":

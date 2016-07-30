@@ -100,7 +100,6 @@ def multi_Vplot(files, show=False):
     """
     # Setup
     fig, ax1 = plt.subplots(figsize=(12, 14))
-    # fig, ax1 = plt.subplots()
     ax1.set_xlabel('Time step')
     ax1.set_ylabel('CO2 (PPM)', color='black')
     for tl in ax1.get_yticklabels():
@@ -193,34 +192,64 @@ def co2_height(files, show=False):
 
     if show:
         plt.show()
+    return 0
 
 
-def plot_density(files, show=False):
+def Bplot_multi(files, show=False):
     """
+    Create multiple box plots in the same figure
     Adapted from Bar's Jupyter notebook
     :param files: Creates plot from list of files
     :param show: Default false, if true will show plots as generated
     :return: 0 on success, 1 on failure
     """
 
+    fig, ax = plt.subplots(figsize=(12, 14))
+
     CO2s = []
     Alts = []
-    lables = []
+    blables = []
 
     for afile in files:
         df = pd.read_csv(str(afile))
         CO2s.append(df['CO2'])
         Alts.append(df['Altitude'])
-        lables.append(afile)
+        blables.append(afile.split("/")[-1].split("_")[-1])
 
-    for (i, co, alt, l) in zip(tableau20, CO2s, Alts, lables):
-        plt.plot(co, alt, color=i, label="CO2_" + l.split("/")[-1].split("_")[-1])
+    # Create the boxplot
+    bp = ax.boxplot(CO2s, patch_artist=True, sym='+')
 
-    plt.xlabel("CO2 (ppm)", fontsize=15, fontweight="bold");
-    plt.ylabel("Altitude", fontsize=15, fontweight="bold");
-    plt.legend(loc=0, fontsize=14)
-    # TODO Check for overwriting and/or ensure unique name
-    plt.savefig("./images/CO2VSAlt{}.png", bbox_inches="tight")
+    # Customise labels
+    ax.set_xticklabels(blables, fontsize=20)
+    plt.xlabel("Flights", fontsize=15, fontweight="bold");
+    plt.ylabel("CO2 (ppm)", fontsize=15, fontweight="bold");
+
+    #TODO remove alternative imlementation (commented out) that rotates colours
+    # change outline color, fill color and line-width of boxes and medians
+    for i in range(len(bp['boxes'])):
+        # change outline and fill color
+        bp['boxes'][i].set(color='k',linewidth=1)
+        bp['boxes'][i].set(facecolor='w')
+        # bp['boxes'][i].set(facecolor=tableau20[i])
+
+        # change color and linewidth of the medians
+        bp['medians'][i].set(color='r', linewidth=3)
+        # bp['medians'][i].set(color=tableau20[i], linewidth=3)
+
+    #Change colour of parameters that come in pairs (whiskers and caps)
+    # for i in range(0,len(bp['whiskers']),2):
+        # change color and line-width of the whiskers
+        # bp['whiskers'][i].set(color=tableau20[i], linewidth=2)
+        # bp['whiskers'][i+1].set(color=tableau20[i], linewidth=2)
+
+        # change color and linewidth of the caps
+        # bp['caps'][i].set(color=tableau20[i], linewidth=2)
+        # bp['caps'][i+1].set(color=tableau20[i], linewidth=2)
+
+
+    # # TODO Check for overwriting and/or ensure unique name
+    plt.savefig("./images/BoxPlot{}.png", bbox_inches="tight")
 
     if show:
         plt.show()
+    return 0
