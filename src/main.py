@@ -23,12 +23,20 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="A command is required")
     subparsers.required = True
 
-    # Plot clean command
-    pc_parser = subparsers.add_parser("plotcleaned",
-                                      help="Clean and plot files: data point not associated with the \"AUTO\" status "
-                                           "are removed")
-    #TODO add configurable "excessive CO2 threashold - currently manually set in common/tools/bclean_log line 133 to 1000
-    pc_parser.add_argument("files", nargs='+', help="(Required) Supply paths to CO2meter csv log files")
+    # Plot simple cleaned scatter of CO2 and Alt
+    ps_parser = subparsers.add_parser("Splot",
+                                      help="Simple clean scatter plots: removes all data points not associated with "
+                                           "the \"AUTO\" status ")
+    # TODO add configurable "excessive CO2 threashold - currently manually set in common/tools/bclean_log line 133 to 1000
+    ps_parser.add_argument("files", nargs='+', help="(Required) Supply paths to CO2meter csv log files")
+
+    # Plot simple cleand historgram
+    ph_parser = subparsers.add_parser("Hplot",
+                                      help="Simple clean histogram plots: removes all data points not associated with "
+                                           "the \"AUTO\" status ")
+    ph_parser.add_argument('bins', type=int, default=50, help="Number of histogram bins to use")
+    # TODO add configurable "excessive CO2 threashold - currently manually set in common/tools/bclean_log line 133 to 1000
+    ph_parser.add_argument("files", nargs='+', help="(Required) Supply paths to CO2meter csv log files")
 
     # Plot aligned command
     pa_parser = subparsers.add_parser("plotaligned",
@@ -49,15 +57,15 @@ def main():
     pm_parser.add_argument("files", nargs='+', help="(Required) Supply paths to CO2meter csv log files")
 
     # Plot by altitude command
-    pm_parser = subparsers.add_parser("plotCVsA",
+    pac_parser = subparsers.add_parser("plotCVsA",
                                       help="Clean, align to st_alt, and plot all supplied log files on the same graph as CO2 vs Altitude "
                                            "showing CO2 by altitude: "
                                            "logs will be cleaned and begin only after the trigger start_alt is reached "
                                            "if given (or by the decent trigger if not")
-    pm_parser.add_argument('st_alt', type=float, default=0.0,
+    pac_parser.add_argument('st_alt', type=float, default=0.0,
                            help=" Supply the GPS read altitude from which to trigger plotting in all "
                                 "supplied files ")
-    pm_parser.add_argument("files", nargs='+', help="(Required) Supply paths to CO2meter csv log files")
+    pac_parser.add_argument("files", nargs='+', help="(Required) Supply paths to CO2meter csv log files")
 
     # Clean directory command
     # c_parser = subparsers.add_parser("clean",
@@ -69,7 +77,7 @@ def main():
     print(args)
 
     # Command Selection
-    if args.command == "plotcleaned":
+    if args.command == "Splot":
         tools.check_make("./temp", "directory")
         tools.check_make("./images", "directory")
         i = range(len(args.files))
@@ -77,8 +85,18 @@ def main():
         for f, i in zip(args.files, i):
             tools.bclean_log(f)
             ffile = "./temp/cleaned_{}".format(str(f.split("/")[-1:][0]))
-            plots.simple_plot(ffile, i, args.s)
-            # make_plot("./temp/cleaned_{}".format(cf[0]),i)
+            plots.simple_Splot(ffile, i, args.s)
+        return 0
+
+    if args.command == "Hplot":
+        tools.check_make("./temp", "directory")
+        tools.check_make("./images", "directory")
+        i = range(len(args.files))
+
+        for f, i in zip(args.files, i):
+            tools.bclean_log(f)
+            ffile = "./temp/cleaned_{}".format(str(f.split("/")[-1:][0]))
+            plots.simple_Hplot(ffile, args.bins, i, args.s)
         return 0
 
     elif args.command == "plotaligned":
@@ -90,7 +108,7 @@ def main():
             tools.bclean_log(f)
             tools.align_logs(f, args.st_alt)
             ffile = "./temp/aligned_{}".format(str(f.split("/")[-1:][0]))
-            plots.simple_plot(ffile, i, args.s)
+            plots.simple_Splot(ffile, i, args.s)
         return 0
 
     elif args.command == "plotVmulti":
@@ -128,6 +146,6 @@ def main():
         print("Unknown command")
         return 1
 
+
 # Run main
 main()
-
