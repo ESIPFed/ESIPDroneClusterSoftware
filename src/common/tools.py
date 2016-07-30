@@ -148,3 +148,12 @@ def bclean_log(afile):
         # - Differentiate altitude (convert alt array into an array of instantaneous rate of change as a better start 'trigger'
         # - Watch for a negative descent/ascent rate (MAV_CMD_CONDITION_CHANGE_ALT)
         pass
+
+def clean_up():
+    """
+    Cleans up after script removing temporary files
+    """
+    print("Cleaning up")
+    subprocess.call("rm -r ./temp/", shell=True)
+
+

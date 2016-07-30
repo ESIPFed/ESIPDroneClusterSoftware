@@ -163,7 +163,7 @@ def main():
         return 0
 
     elif args.command == "clean":
-        clean_up()
+        tools.clean_up()
         return 0
 
     else:
