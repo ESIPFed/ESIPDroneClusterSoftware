@@ -16,7 +16,7 @@ for a HOWTO and or run
 $ python src/main.py -h
 ```
 
-# Serializaing the Sample CSV Data as RDF
+# Serializing the Sample CSV Data as RDF
 
 It has become a topic of interest to experiment with mapping Drone data into 
 [linked data](https://www.w3.org/standards/semanticweb/data)
