@@ -31,13 +31,14 @@ rdfxml, trix, turtle and uri's. The guide below displays exactly how you can do 
 
 ## Requirements
  * Java 8
- * [Apache Maven](http://maven.apache.org)
+ * [Apache Maven](http://maven.apache.org) 3+
 
 First download the Any23 source and install it
 ```
-$ cd /usr/local
+$ cd cd ~/.local/
 $ git clone https://github.com/apache/any23.git && cd any23
-$ mvn install -DskipTests
+$ mvn clean install -DskipTests
+$ sudo cd ../ && mv any23 /usr/local/
 ```
 The run the [Any23 Command Line Interface](http://any23.apache.org/getting-started.html#Use_the_Apache_Any23_CLI) 
 tooling. The following assumes that you have the ESIPDroneClusterSoftware directory located at 
